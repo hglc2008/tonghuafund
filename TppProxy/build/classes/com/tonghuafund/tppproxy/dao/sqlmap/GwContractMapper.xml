@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tonghuafund.tppproxy.dao.mapper.GwContractMapper">
+	<resultMap id="BaseResultMap" type="com.tonghuafund.tppproxy.dao.GwContract">
+		<id column="ROW_ID" property="rowID" jdbcType="BIGINT" />
+		<result column="AGENT_ID" property="agentID" jdbcType="VARCHAR" />
+		<result column="MCHT_ID" property="mchtID" jdbcType="VARCHAR" />
+		<result column="ACCT_CAT" property="acctCat" jdbcType="CHAR" />
+		<result column="ACCT_NAME" property="acctName" jdbcType="VARCHAR" />
+		<result column="ACCT_NO" property="acctNo" jdbcType="VARCHAR" />
+		<result column="IDCARD_TYPE" property="idCardType" jdbcType="CHAR" />
+		<result column="IDCARD_NO" property="idCardNO" jdbcType="VARCHAR" />
+		<result column="MCHT_CONTRACT_NO" property="mchtContractNO"
+			jdbcType="VARCHAR" />
+		<result column="BANK_CONTRACT_NO" property="bankContractNO"
+			jdbcType="VARCHAR" />
+		<result column="STATE" property="sate" jdbcType="SMALLINT" />
+		<result column="CREATE_DATETIME" property="createDatetime"
+			jdbcType="TIMESTAMP" />
+		<result column="CREATE_OPERATOR" property="createOperator"
+			jdbcType="VARCHAR" />
+		<result column="LAST_UPDATE_DATETIME" property="lastUpdateDatetime"
+			jdbcType="TIMESTAMP" />
+		<result column="LAST_UPDATE_OPERATOR" property="lastUpdateOperator"
+			jdbcType="VARCHAR" />
+		<result column="CHANNEL_ID" property="channelID" jdbcType="INTEGER" />
+		<result column="PHONE_NO" property="phoneNO" jdbcType="VARCHAR" />
+		<result column="QUOTA_PER_ORDER" property="quotaPerOrder"
+			jdbcType="BIGINT" />
+		<result column="QUOTA_PER_DAY" property="quotaPerDay" jdbcType="BIGINT" />
+	</resultMap>
+	<sql id="Example_Where_Clause">
+		<trim prefix="where" prefixOverrides="and|or">
+			<if test="condition.AGENTID != null">
+				and AGENT_ID = #{condition.agentID,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.MCHTID != null">
+				and MCHT_ID = #{condition.mchtID,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.ACCTCAT != null">
+				and ACCT_CAT = #{condition.acctCat,jdbcType=CHAR}
+			</if>
+			<if test="condition.ACCTNAME != null">
+				and ACCT_NAME = #{condition.acctName,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.ACCTNO != null">
+				and ACCT_NO = #{condition.acctNo,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.IDCARDTYPE != null">
+				and IDCARD_TYPE = #{condition.idCardType,jdbcType=CHAR}
+			</if>
+			<if test="condition.IDCARDNO != null">
+				and IDCARD_NO = #{condition.idCardNO,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.MCHTCONTRACTNO != null">
+				and MCHT_CONTRACT_NO =
+				#{condition.mchtContractNO,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.BANKCONTRACTNO != null">
+				and BANK_CONTRACT_NO =
+				#{condition.bankContractNO,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.STATE != null">
+				and STATE = #{condition.sate,jdbcType=SMALLINT}
+			</if>
+			<if test="condition.CREATEDATETIME != null">
+				and CREATE_DATETIME =
+				#{condition.createDatetime,jdbcType=TIMESTAMP}
+			</if>
+			<if test="condition.CREATEOPERATOR != null">
+				and CREATE_OPERATOR =
+				#{condition.createOperator,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.lastUpdateDatetime != null">
+				and LAST_UPDATE_DATETIME =
+				#{condition.LASTUPDATEDATETIME,jdbcType=TIMESTAMP}
+			</if>
+			<if test="condition.lastUpdateOperator != null">
+				and LAST_UPDATE_OPERATOR =
+				#{condition.LASTUPDATEOPERATOR,jdbcType=VARCHAR}
+			</if>
+			<if test="condition.CHANNELID != null">
+				and CHANNEL_ID = #{condition.channelID,jdbcType=INTEGER}
+			</if>
+			<if test="condition.PHONENO != null">
+				and PHONE_NO = #{condition.phoneNO,jdbcType=VARCHAR}
+			</if>
+		</trim>
+	</sql>
+
+	<sql id="Base_Column_List">
+		ROW_ID, AGENT_ID, MCHT_ID, ACCT_CAT, ACCT_NAME, ACCT_NO,
+		IDCARD_TYPE,
+		IDCARD_NO,
+		MCHT_CONTRACT_NO, BANK_CONTRACT_NO, STATE,
+		CREATE_DATETIME, CREATE_OPERATOR,
+		LAST_UPDATE_DATETIME,
+		LAST_UPDATE_OPERATOR, CHANNEL_ID, PHONE_NO, QUOTA_PER_ORDER,
+		QUOTA_PER_DAY
+	</sql>
+	<select id="selectByExample" resultMap="BaseResultMap"
+		parameterType="com.tonghuafund.tppproxy.dao.Criteria">
+		select
+		<if test="distinct">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		from GW_CONTRACT
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null">
+			order by ${orderByClause}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from GW_CONTRACT
+		where ROW_ID = #{rowID,jdbcType=BIGINT}
+	</select>
+	<select id="selectFirstByAcctNO" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from GW_CONTRACT
+		where ACCT_NO = #{acctNO,jdbcType=VARCHAR}
+		order by
+		ROW_ID desc
+		fetch first 1 rows only
+	</select>
+</mapper>

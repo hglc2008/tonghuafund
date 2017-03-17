@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+       http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.0.xsd">
+
+	<!-- 运行时修改以下部分 -->
+	<!-- ipp后台收单地址 -->
+	<bean id="bgCollectionUrl" class="java.lang.String">
+		<constructor-arg type="String"
+			value="http://10.2.210.11:8080/igateway/recvV10Request" />
+	</bean>
+	<!-- ipp前台收单地址 -->
+	<bean id="pageCollectionUrl" class="java.lang.String">
+		<constructor-arg type="String"
+			value="http://10.2.210.11:8080/igateway/recvV10Request" />
+	</bean>
+	<!-- 请求ipp时,加签类型 -->
+	<bean id="signType" class="java.lang.String">
+		<constructor-arg type="String" value="0" />
+	</bean>
+	<!-- 商户md5Key -->
+	<bean id="md5Key" class="java.lang.String">
+		<constructor-arg type="String" value="12345678901" />
+	</bean>
+	<!-- ipp公钥证书,用于响应报文验签 -->
+	<bean id="certFileName" class="java.lang.String">
+		<constructor-arg type="String" value="/tppapp/tppProxy/security/allinpay_th.cer" />
+	</bean>
+	<!-- 运行时修改以上部分 -->
+
+	<!-- part1通讯层实现 -->
+	<!-- post通讯实现 -->
+	<bean id="httpPostMessageComService"
+		class="com.allinpay.ipps.service.communicate.http.HttpPostMessageComService">
+		<property name="connectionTimeout" value="10000"></property>
+		<property name="readTimeout" value="50000"></property>
+	</bean>
+
+	<!-- 通讯层门面 -->
+	<bean id="messageComService" class="com.allinpay.ipps.service.communicate.MessageComService" />
+
+	<bean id="messageComServiceRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="messageComService" />
+		</property>
+		<property name="targetMethod">
+			<value>registMessageComServices</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="httpPostMessageComService" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- part2 transaction层实现 -->
+	<!-- MessageRequestWrap,把transaction层实体,包装成通讯层实体 -->
+	<bean id="httpMessageRequestWrap"
+		class="com.allinpay.ipps.service.transaction.requestWrap.HttpMessageRequestWrap">
+		<property name="charset" value="UTF-8"></property>
+		<property name="url" ref="bgCollectionUrl"></property>
+		<property name="method" value="POST"></property>
+	</bean>
+
+	<!-- 响应报文bean -->
+	<bean id="accountBalanceV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.AccountBalanceV10ResponseDoc" />
+	<bean id="accountTxDetailV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.AccountTxDetailV10ResponseDoc" />
+	<bean id="authenticateQpV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.AuthenticateQpV10ResponseDoc" />
+	<bean id="authenticateV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.AuthenticateV10ResponseDoc" />
+	<bean id="batchTransQueryV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.BatchTransQueryV10ResponseDoc" />
+	<bean id="billQueryV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.BillQueryV10ResponseDoc" />
+	<bean id="billSettleV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.BillSettleV10ResponseDoc" />
+	<bean id="contractSignV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.ContractSignV10ResponseDoc" />
+	<bean id="deductV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.DeductV10ResponseDoc" />
+	<bean id="eBankConsumeV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.EBankConsumeV10ResponseDoc" />
+	<bean id="mobileChargeV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.MobileChargeV10ResponseDoc" />
+	<bean id="mobileContractSignV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.MobileContractSignV10ResponseDoc" />
+	<bean id="paymentV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.PaymentV10ResponseDoc" />
+	<bean id="payVerifyCodeV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.PayVerifyCodeV10ResponseDoc" />
+	<bean id="sConsumeV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.SConsumeV10ResponseDoc" />
+	<bean id="sReFundV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.SReFundV10ResponseDoc" />
+	<bean id="transferApplyV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.TransferApplyV10ResponseDoc" />
+	<bean id="verifyCodeV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.VerifyCodeV10ResponseDoc" />
+
+
+	<!-- 响应报文bean -->
+	<bean id="accountBaiMingSingleV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.AccountBaiMingSingleV10ResponseDoc" />
+
+	<bean id="errorResponseDoc" class="com.allinpay.ipps.entity.component.v10.ErrorResponseDoc" />
+
+	<bean id="contractSignV10ForwardResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.ContractSignV10ForwardResponseDoc" />
+	<bean id="eBankConsumeV10ForwardResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.EBankConsumeV10ForwardResponseDoc" />
+	<bean id="sConsumeV10ForwardResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.SConsumeV10ForwardResponseDoc" />
+	<!-- 保证金线下消费 -->
+	<bean id="sconsumeOfflineV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.SConsumeOfflineV10ResponseDoc" />
+
+	<!-- 保证金线下冲正 -->
+	<bean id="sconsumeOfflineCancelV10ResponseDoc"
+		class="com.allinpay.ipps.entity.component.v10.SConsumeOfflineCancelV10ResponseDoc" />
+
+	<!-- part2.1.1 在线同步transaction实现 -->
+	<bean id="xmlRequestEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.XmlRequestEnrichment" />
+	<bean id="digitalSignRequestEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.DigitalSignRequestEnrichment">
+		<property name="md5key" ref="md5Key"></property>
+		<property name="signType" value="signType"></property>
+	</bean>
+	<bean id="base64RequestEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.Base64RequestEnrichment" />
+
+	<bean id="base64ResponseEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.Base64ResponseEnrichment" />
+	<bean id="digitalSignResponseEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.DigitalSignResponseEnrichment">
+		<property name="md5key" ref="md5Key"></property>
+		<property name="certFileName" ref="certFileName"></property>
+	</bean>
+	<bean id="xmlResponseEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.XmlResponseEnrichment" />
+	<bean id="xmlResponseEnrichmentRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="xmlResponseEnrichment" />
+		</property>
+		<property name="targetMethod">
+			<value>registResponseBeans</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="accountBalanceV10ResponseDoc" />
+				<ref bean="accountTxDetailV10ResponseDoc" />
+				<ref bean="authenticateQpV10ResponseDoc" />
+				<ref bean="authenticateV10ResponseDoc" />
+				<ref bean="batchTransQueryV10ResponseDoc" />
+				<ref bean="billQueryV10ResponseDoc" />
+				<ref bean="billSettleV10ResponseDoc" />
+				<ref bean="contractSignV10ResponseDoc" />
+				<ref bean="deductV10ResponseDoc" />
+				<ref bean="eBankConsumeV10ResponseDoc" />
+				<ref bean="mobileChargeV10ResponseDoc" />
+				<ref bean="mobileContractSignV10ResponseDoc" />
+				<ref bean="paymentV10ResponseDoc" />
+				<ref bean="payVerifyCodeV10ResponseDoc" />
+				<ref bean="sConsumeV10ResponseDoc" />
+				<ref bean="sReFundV10ResponseDoc" />
+				<ref bean="transferApplyV10ResponseDoc" />
+				<ref bean="verifyCodeV10ResponseDoc" />
+				<ref bean="sconsumeOfflineV10ResponseDoc" />
+				<ref bean="sconsumeOfflineCancelV10ResponseDoc" />
+				<ref bean="accountBaiMingSingleV10ResponseDoc" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionOLSService"
+		class="com.allinpay.ipps.service.transaction.TransactionOLSService">
+		<property name="messageRequestWarp" ref="httpMessageRequestWrap"></property>
+		<property name="messageComService" ref="httpPostMessageComService"></property>
+	</bean>
+
+	<bean id="transactionOLSServiceRequestChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionOLSService" />
+		</property>
+		<property name="targetMethod">
+			<value>registRequestEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="xmlRequestEnrichment" />
+				<ref bean="digitalSignRequestEnrichment" />
+				<ref bean="base64RequestEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionOLSServiceResponseChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionOLSService" />
+		</property>
+		<property name="targetMethod">
+			<value>registResponseEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="base64ResponseEnrichment" />
+				<ref bean="digitalSignResponseEnrichment" />
+				<ref bean="xmlResponseEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- part2.1.2 联机转发transaction实现 -->
+	<bean id="transactionOLTService"
+		class="com.allinpay.ipps.service.transaction.TransactionOLTService">
+		<property name="messageRequestWarp" ref="httpMessageRequestWrap"></property>
+		<property name="messageComService" ref="httpPostMessageComService"></property>
+	</bean>
+
+	<bean id="transactionOLTServiceRequestChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionOLTService" />
+		</property>
+		<property name="targetMethod">
+			<value>registRequestEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="xmlRequestEnrichment" />
+				<ref bean="digitalSignRequestEnrichment" />
+				<ref bean="base64RequestEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionOLTServiceResponseChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionOLTService" />
+		</property>
+		<property name="targetMethod">
+			<value>registResponseEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="base64ResponseEnrichment" />
+				<ref bean="digitalSignResponseEnrichment" />
+				<ref bean="xmlResponseEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- part2.1.3 联机转发transaction实现 -->
+	<!-- 2.1.3.1 中间状态响应的处理链 -->
+	<bean id="xmlForwardResponseEnrichment"
+		class="com.allinpay.ipps.service.transaction.enrichment.impl.XmlForwardResponseEnrichment" />
+	<bean id="xmlForwardResponseEnrichmentRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="xmlForwardResponseEnrichment" />
+		</property>
+		<property name="targetMethod">
+			<value>registResponseBeans</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="contractSignV10ForwardResponseDoc" />
+				<ref bean="eBankConsumeV10ForwardResponseDoc" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionPAService"
+		class="com.allinpay.ipps.service.transaction.TransactionPAService">
+		<property name="url" ref="pageCollectionUrl"></property>
+	</bean>
+
+	<bean id="transactionPAServiceRequestChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionPAService" />
+		</property>
+		<property name="targetMethod">
+			<value>registRequestEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="xmlRequestEnrichment" />
+				<ref bean="digitalSignRequestEnrichment" />
+				<ref bean="base64RequestEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionPAServiceResponseChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionPAService" />
+		</property>
+		<property name="targetMethod">
+			<value>registResponseEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="base64ResponseEnrichment" />
+				<ref bean="digitalSignResponseEnrichment" />
+				<ref bean="xmlResponseEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="transactionPAServiceForwardResponseChainRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="transactionPAService" />
+		</property>
+		<property name="targetMethod">
+			<value>registForwardResponseEnrichmentChain</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="xmlForwardResponseEnrichment" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- part3 支付层实现 -->
+	<bean id="paymentService" class="com.allinpay.ipps.service.PaymentService" />
+	<bean id="paymentServiceOLSServiceRegister"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject">
+			<ref bean="paymentService" />
+		</property>
+		<property name="targetMethod">
+			<value>registTransactionServices</value>
+		</property>
+		<property name="arguments">
+			<list>
+				<ref bean="transactionOLSService" />
+				<ref bean="transactionOLTService" />
+				<ref bean="transactionPAService" />
+			</list>
+		</property>
+	</bean>
+</beans>
